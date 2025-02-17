@@ -2,6 +2,7 @@ import discord
 import os
 import random
 import requests
+import threading
 from discord.ext import commands
 from flask import Flask
 
@@ -93,9 +94,14 @@ async def rps(ctx, choice: str):
 async def on_ready():
     print(f'Logged in as {bot.user}')
 
-# Run the Flask app and bot
-if __name__ == "__main__":
+# Function to run Flask in a separate thread
+def run_flask():
     port = int(os.getenv("PORT", 5000))  # Get port from Render
-    app.run(host="0.0.0.0", port=port)  # Start Flask app
-    
-    bot.run(os.getenv("DISCORD_BOT_TOKEN"))  # Start bot
+    app.run(host="0.0.0.0", port=port)
+
+# Start Flask in a new thread
+flask_thread = threading.Thread(target=run_flask)
+flask_thread.start()
+
+# Start the bot
+bot.run(os.getenv("DISCORD_BOT_TOKEN"))
